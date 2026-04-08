@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="MeText.vcxproj" Id="4d7fbeb0-8765-4635-bf93-3793db50888f" />
+</Solution>
