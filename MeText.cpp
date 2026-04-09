@@ -10,6 +10,7 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+std::wstring fullString = L"";
 WCHAR lastChar = L' ';
 UINT charCount = 0;
 UINT charSpacing = 10;
@@ -149,11 +150,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-			//create string to display
-            std::wstring msg = std::wstring(1, lastChar);
 
             //draw the text at the coordinates x=5 + charCount*charSpacing, y=10
-            TextOut(hdc, 5 + charCount*charSpacing, 15, msg.c_str(), (int) msg.length());
+            TextOut(hdc, 5, 15, fullString.c_str(), (int) fullString.length());
 
             //draw the info text
             std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar);
@@ -165,13 +164,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             if (wParam == VK_BACK && charCount > 0) {
                 lastChar = L'  ';
-                InvalidateRect(hWnd, NULL, FALSE);
+                InvalidateRect(hWnd, NULL, TRUE);
+                fullString.pop_back();
                 charCount--;
                 break;
             }
+            else if (wParam == VK_BACK && charCount == 0) break;
+
 		    lastChar = (WCHAR)wParam;
+            fullString += (WCHAR)wParam;
             //SendMessageW(hWnd, WM_PAINT, 0, 0);
-		    InvalidateRect(hWnd, NULL, FALSE);
+		    InvalidateRect(hWnd, NULL, TRUE);
             charCount++;
         }
         break;
@@ -180,6 +183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (wParam == VK_DELETE && charCount > 0) {
             lastChar = L'  ';
             InvalidateRect(hWnd, NULL, FALSE);
+            fullString.pop_back();
             charCount--;
         }
     }
