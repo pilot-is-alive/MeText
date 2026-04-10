@@ -15,6 +15,8 @@ WCHAR lastChar = L' ';
 UINT charCount = 0;
 UINT charSpacing = 10;
 
+std::shared_ptr<Text> text = std::make_shared<Text>();
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -152,7 +154,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
 
             //draw the text at the coordinates x=5 + charCount*charSpacing, y=10
-            TextOut(hdc, 5, 15, fullString.c_str(), (int) fullString.length());
+            TextOut(hdc, 5, 15, text->c_str(), text->size());
 
             //draw the info text
             std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar);
@@ -163,28 +165,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CHAR:
         {
             if (wParam == VK_BACK && charCount > 0) {
-                lastChar = L'  ';
+                lastChar = text->back();
+                charCount = text->size();
                 InvalidateRect(hWnd, NULL, TRUE);
-                fullString.pop_back();
-                charCount--;
                 break;
             }
             else if (wParam == VK_BACK && charCount == 0) break;
 
-		    lastChar = (WCHAR)wParam;
-            fullString += (WCHAR)wParam;
+            text->add((WCHAR)wParam);
+            lastChar = text->lastChar();
+            charCount = text->size();
+
             //SendMessageW(hWnd, WM_PAINT, 0, 0);
 		    InvalidateRect(hWnd, NULL, TRUE);
-            charCount++;
         }
         break;
     case WM_KEYDOWN:
     {
         if (wParam == VK_DELETE && charCount > 0) {
-            lastChar = L'  ';
-            InvalidateRect(hWnd, NULL, FALSE);
-            fullString.pop_back();
-            charCount--;
+            lastChar = text->back();
+            charCount = text->size();
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
         }
     }
     break;
