@@ -9,13 +9,15 @@ private:
 public:
 	Text();
 	Text(WCHAR letter);
+
+	WCHAR firstChar(); 
 	WCHAR lastChar();
 	
 	bool isEmpty();
 	void deleteAll();
 	WCHAR back();
 	void add(WCHAR letter);
-	std::wstring& content();
+	const std::wstring& content();
 	LPCWSTR c_str();
 	int size();
 };

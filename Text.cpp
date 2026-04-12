@@ -8,6 +8,10 @@ Text::Text(WCHAR letter) {
 	word = std::wstring(1, letter);
 }
 
+WCHAR Text::firstChar() {
+	return word.front();
+}
+
 WCHAR Text::lastChar() {
 	return word.back();
 }
@@ -32,7 +36,7 @@ void Text::add(WCHAR letter) {
 	word += std::wstring(1, letter);
 }
 
-std::wstring& Text::content() {
+const std::wstring& Text::content() {
 	return word;
 }
 

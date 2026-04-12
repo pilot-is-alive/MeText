@@ -13,7 +13,11 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 std::wstring fullString = L"";
 WCHAR lastChar = L' ';
 UINT charCount = 0;
+UINT wordCount = 0;
 UINT charSpacing = 10;
+Text currentText;
+Line currentLine;
+std::vector<Line> lines; // TODO: use this for future multiline editing
 
 std::shared_ptr<Text> text = std::make_shared<Text>();
 
@@ -154,10 +158,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
 
             //draw the text at the coordinates x=5 + charCount*charSpacing, y=10
-            TextOut(hdc, 5, 15, text->c_str(), text->size());
+            //TextOut(hdc, 5, 15, text->c_str(), text->size());
+            TextOut(hdc, 5, 15, currentLine.c_str(), charCount);
 
             //draw the info text
-            std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar);
+            std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar) + L" : Word count: " + std::to_wstring(currentLine.size());
             TextOut(hdc, 5, 0, msgInfo.c_str(), (int) msgInfo.length());
             EndPaint(hWnd, &ps);
         }
@@ -165,16 +170,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CHAR:
         {
             if (wParam == VK_BACK && charCount > 0) {
-                lastChar = text->back();
-                charCount = text->size();
+                lastChar = currentLine.backChar();
+                charCount = currentLine.content().length();;
                 InvalidateRect(hWnd, NULL, TRUE);
                 break;
             }
             else if (wParam == VK_BACK && charCount == 0) break;
 
-            text->add((WCHAR)wParam);
-            lastChar = text->lastChar();
-            charCount = text->size();
+            if (wParam == VK_SPACE) {
+                currentLine.addSpace();
+                lastChar = (WCHAR)wParam;
+                charCount = currentLine.content().length();
+                break;
+            }
+
+            if (wParam == VK_RETURN) {
+
+            }
+
+            currentLine.addChar((WCHAR)wParam);
+            lastChar = currentLine.lastWord().back();
+            charCount = currentLine.content().length();
+
+            //text->add((WCHAR)wParam);
+            //lastChar = text->lastChar();
+            //charCount = text->size();
 
             //SendMessageW(hWnd, WM_PAINT, 0, 0);
 		    InvalidateRect(hWnd, NULL, TRUE);
