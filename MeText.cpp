@@ -162,7 +162,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             TextOut(hdc, 5, 15, currentLine.c_str(), charCount);
 
             //draw the info text
-            std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar) + L" : Word count: " + std::to_wstring(currentLine.size());
+            std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar) + L" : Word count: " + std::to_wstring(currentLine.sizeWords());
             TextOut(hdc, 5, 0, msgInfo.c_str(), (int) msgInfo.length());
             EndPaint(hWnd, &ps);
         }
@@ -171,7 +171,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             if (wParam == VK_BACK && charCount > 0) {
                 lastChar = currentLine.backChar();
-                charCount = currentLine.content().length();;
+                charCount = currentLine.size();
                 InvalidateRect(hWnd, NULL, TRUE);
                 break;
             }
@@ -181,6 +181,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 currentLine.addSpace();
                 lastChar = (WCHAR)wParam;
                 charCount = currentLine.content().length();
+                InvalidateRect(hWnd, NULL, TRUE);
                 break;
             }
 
@@ -190,7 +191,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             currentLine.addChar((WCHAR)wParam);
             lastChar = currentLine.lastWord().back();
-            charCount = currentLine.content().length();
+            charCount = currentLine.size();
 
             //text->add((WCHAR)wParam);
             //lastChar = text->lastChar();

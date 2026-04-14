@@ -8,6 +8,8 @@ class Line
 private:
 	std::wstring line;
 	std::vector<Text>  texts;
+
+	bool endIsSpace();
 public:
 	Line();
 	Line(const WCHAR& text);
@@ -28,5 +30,6 @@ public:
 	const std::wstring& content();
 	LPCWSTR c_str();
 	int size();
+	int sizeWords();
 };
 

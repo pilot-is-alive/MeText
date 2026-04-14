@@ -43,13 +43,22 @@ Text Line::back() {
 }
 
 WCHAR Line::backChar() {
-	if (texts.back().isEmpty()) {
+	if (endIsSpace()) {
+		line.resize(line.size() - 1);
+		return L' ';
+	}
+
+	if (texts.back().isEmpty()) { //pre-deletion check
 		texts.pop_back();
 	}
 
 	WCHAR deletedChar = texts.back().lastChar();
 	texts.back().back();
 	line.resize(line.size() - 1);
+
+	if (texts.back().isEmpty()) { //post-deletion check
+		texts.pop_back();
+	}
 
 	return deletedChar;
 }
@@ -60,17 +69,14 @@ void Line::add(Text& newWord) {
 }
 
 void Line::addSpace() {
-	static Text space(L' ');
-	
-	line += space.content();
-
-	add(space);
+	line += L" ";
 }
 
 void Line::addChar(WCHAR letter)
 {
-	if (isEmpty()) {
+	if (isEmpty() || endIsSpace()) {
 		texts.push_back(Text(letter));
+		line += letter;
 		return;
 	}
 
@@ -96,5 +102,14 @@ LPCWSTR Line::c_str() {
 }
 
 int Line::size() {
+	return line.size();
+}
+
+int Line::sizeWords() {
 	return texts.size();
+}
+
+bool Line::endIsSpace() {
+	if (line.back() == L' ') return true;
+	return false;
 }
