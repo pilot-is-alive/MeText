@@ -15,3 +15,5 @@
 #include <tchar.h>
 // C++ header files
 #include <string>
+#include <iostream>
+#include <stdexcept>

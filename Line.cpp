@@ -10,7 +10,7 @@ Line::Line(const WCHAR& text) {
 	texts = std::vector<Text>{ Text(text) };
 }
 
-const std::wstring& Line::firstWord() {
+const std::wstring& Line::firstWordContent() {
 	static const std::wstring empty = L"";
 
 	if (isEmpty()) return empty;
@@ -18,12 +18,28 @@ const std::wstring& Line::firstWord() {
 	return texts.front().content();
 }
 
-const std::wstring& Line::lastWord() {
+const std::wstring& Line::lastWordContent() {
 	static const std::wstring empty = L"";
 
 	if (isEmpty()) return empty;
 
 	return texts[texts.size() - 1].content();
+}
+
+Text& Line::firstWord() {
+	static Text empty = Text();
+
+	if (isEmpty()) return empty;
+
+	return texts.back();
+}
+
+Text& Line::lastWord() {
+	static Text empty = Text();
+
+	if (isEmpty()) return empty;
+
+	return texts.back();
 }
 
 bool Line::isEmpty() {
@@ -34,7 +50,7 @@ void Line::deleteAll() {
 	texts.clear();
 	line.clear();
 }
-Text Line::back() {
+Text Line::deleteBack() {
 	Text deletedText = texts.back();
 	texts.pop_back();
 	line.resize(line.size() - deletedText.size());
@@ -42,7 +58,7 @@ Text Line::back() {
 	return deletedText;
 }
 
-WCHAR Line::backChar() {
+WCHAR Line::deleteBackChar() {
 	if (endIsSpace()) {
 		line.resize(line.size() - 1);
 		return L' ';
@@ -53,7 +69,7 @@ WCHAR Line::backChar() {
 	}
 
 	WCHAR deletedChar = texts.back().lastChar();
-	texts.back().back();
+	texts.back().deleteBackChar();
 	line.resize(line.size() - 1);
 
 	if (texts.back().isEmpty()) { //post-deletion check
@@ -63,6 +79,10 @@ WCHAR Line::backChar() {
 	return deletedChar;
 }
 
+void Line::deleteCRLF() {
+	line.resize(line.size() - 2); //remove '\r\n'
+}
+
 void Line::add(Text& newWord) {
 	line += newWord.content();
 	texts.push_back(newWord);
@@ -70,6 +90,10 @@ void Line::add(Text& newWord) {
 
 void Line::addSpace() {
 	line += L" ";
+}
+
+void Line::addCRLF() {
+	line += L"\r\n";
 }
 
 void Line::addChar(WCHAR letter)
@@ -84,7 +108,7 @@ void Line::addChar(WCHAR letter)
 	texts.back().add(letter);
 }
 
-const std::wstring& Line::content() {
+const std::wstring& Line::wstring() {
 	if (isEmpty()) return L"";
 
 	if (line.empty()) {

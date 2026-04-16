@@ -15,7 +15,7 @@ public:
 	
 	bool isEmpty();
 	void deleteAll();
-	WCHAR back();
+	WCHAR deleteBackChar();
 	void add(WCHAR letter);
 	const std::wstring& content();
 	LPCWSTR c_str();

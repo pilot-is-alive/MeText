@@ -17,7 +17,8 @@ UINT wordCount = 0;
 UINT charSpacing = 10;
 Text currentText;
 Line currentLine;
-std::vector<Line> lines; // TODO: use this for future multiline editing
+SIZE lineSize;
+Paragraph currentParagraph = Paragraph();
 
 std::shared_ptr<Text> text = std::make_shared<Text>();
 
@@ -159,10 +160,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             //draw the text at the coordinates x=5 + charCount*charSpacing, y=10
             //TextOut(hdc, 5, 15, text->c_str(), text->size());
-            TextOut(hdc, 5, 15, currentLine.c_str(), charCount);
+            for (UINT i = 1; i <= currentParagraph.sizeLines(); i++) {
+                LPCWSTR lineText = currentParagraph.c_str(i);
+                int len = lstrlenW(lineText);
+                GetTextExtentPoint32(hdc, lineText, len, &lineSize);
+                TextOut(hdc, 5, 15 + (i - 1) * lineSize.cy, lineText, len);
+
+                std::wcout << lineText << std::endl;
+            }
+            
+            //TextOut(hdc, 5, 15, currentLine.c_str(), charCount);
 
             //draw the info text
-            std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar) + L" : Word count: " + std::to_wstring(currentLine.sizeWords());
+            std::wstring msgInfo = L"Character count: " + std::to_wstring(charCount) + L" : Last Character: " + std::wstring(1, lastChar) + L" : Word count: " + std::to_wstring(currentParagraph.sizeWordsTotal());
             TextOut(hdc, 5, 0, msgInfo.c_str(), (int) msgInfo.length());
             EndPaint(hWnd, &ps);
         }
@@ -170,28 +180,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CHAR:
         {
             if (wParam == VK_BACK && charCount > 0) {
-                lastChar = currentLine.backChar();
-                charCount = currentLine.size();
+                if (currentParagraph.sizeCharsLastLine() == 0) {
+                    currentParagraph.deleteLine();
+                    currentParagraph.deleteCRLF();
+                }
+
+                lastChar = currentParagraph.deleteChar();
+                charCount = currentParagraph.sizeCharsTotal();
                 InvalidateRect(hWnd, NULL, TRUE);
                 break;
             }
             else if (wParam == VK_BACK && charCount == 0) break;
 
             if (wParam == VK_SPACE) {
-                currentLine.addSpace();
+                currentParagraph.addSpace();
                 lastChar = (WCHAR)wParam;
-                charCount = currentLine.content().length();
+                charCount = currentParagraph.sizeCharsTotal();
+
+                //currentLine.addSpace();
+                //lastChar = (WCHAR)wParam;
+                //charCount = currentLine.wstring().length();
                 InvalidateRect(hWnd, NULL, TRUE);
                 break;
             }
 
             if (wParam == VK_RETURN) {
+                currentParagraph.addCRLF();
+                //currentParagraph.addChar(L'\r');
+                //currentParagraph.addChar(L'\n');
+                currentParagraph.newLine();
 
+                InvalidateRect(hWnd, NULL, TRUE);
+                break;
             }
 
-            currentLine.addChar((WCHAR)wParam);
-            lastChar = currentLine.lastWord().back();
-            charCount = currentLine.size();
+            currentParagraph.addChar((WCHAR)wParam);
+            lastChar = currentParagraph.lastLineChar();
+            charCount = currentParagraph.sizeCharsTotal();
 
             //text->add((WCHAR)wParam);
             //lastChar = text->lastChar();
@@ -204,8 +229,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_KEYDOWN:
     {
         if (wParam == VK_DELETE && charCount > 0) {
-            lastChar = text->back();
-            charCount = text->size();
+            lastChar = currentLine.deleteBackChar();
+            charCount = currentLine.size();
             InvalidateRect(hWnd, NULL, TRUE);
             break;
         }

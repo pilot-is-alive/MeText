@@ -24,7 +24,7 @@ void Text::deleteAll() {
 	word.clear();
 }
 
-WCHAR Text::back() {
+WCHAR Text::deleteBackChar() {
 	if (isEmpty()) return L'\0';
 
 	WCHAR removedChar = word.back();
